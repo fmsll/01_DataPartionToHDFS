@@ -28,6 +28,9 @@ class DataSource:
     def directory_list(self):
         with os.scandir(self.source_path) as sp:
             index = 1
+            print("+++++++++++++++++++++++++++++++++++++++")
+            print(f"LISTING DIRECTORY \'{self.source_path}\'")
+            print("+++++++++++++++++++++++++++++++++++++++")
             for entry in sp:
                 print(f'{index}. {entry.name}')
                 index += 1
@@ -36,21 +39,21 @@ class DataSource:
         with os.scandir(self.source_path) as it:
             for entry in it:
                 if entry.name.endswith(self.file_extension):
-                    self.files_name.append(entry.name)
+                    self.files_name.append(entry.path)
 
     def get_partitions_names(self, field: str):
         while not self.files_name == []:
-            with open((self.source_path + self.files_name).pop(), "r", encoding='Latin1') as file:
+            with open(self.files_name.pop(), "r", encoding='Latin1') as file:
                 data = csv.DictReader(file, delimiter=';')
                 for x in data:
                     if not x[field] in self.partitions_name and x[field] != '':
                         self.partitions_name.append(x[field])
 
-source = DataSource(file_extension="csv")
+source = DataSource(source_path="data/2021", file_extension="csv")
 
 source.directory_list()
 print()
 source.get_source_files()
 
-source.get_partitions_names(field='regiao')
+source.get_partitions_names(field='estado')
 print(source.partitions_name)
