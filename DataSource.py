@@ -1,5 +1,6 @@
 import os
 import csv
+from time import sleep
 
 
 class DataSource:
@@ -7,7 +8,9 @@ class DataSource:
         self.__source_path = source_path
         self.__file_extension = file_extension
         self.files_name = []
+        self.files_full_path = []
         self.partitions_name = []
+        self.partition_field = ""
 
     @property
     def source_path(self):
@@ -39,21 +42,65 @@ class DataSource:
         with os.scandir(self.source_path) as it:
             for entry in it:
                 if entry.name.endswith(self.file_extension):
-                    self.files_name.append(entry.path)
+                    self.files_name.append(entry.name)
+                    self.files_full_path.append((entry.path))
 
     def get_partitions_names(self, field: str):
-        while not self.files_name == []:
-            with open(self.files_name.pop(), "r", encoding='Latin1') as file:
+        num_files = len(self.files_name)
+        self.partition_field = field
+        while not num_files == 0:
+            file_name_temp = self.files_full_path[num_files-1]
+            with open(file_name_temp, "r", encoding='Latin1') as file:
                 data = csv.DictReader(file, delimiter=';')
                 for x in data:
-                    if not x[field] in self.partitions_name and x[field] != '':
+                    if not x[field] in self.partitions_name:
                         self.partitions_name.append(x[field])
+            num_files -= 1
 
-source = DataSource(source_path="data/2021", file_extension="csv")
+    def split_data_in_partitions(self):
+        num_files = len(self.files_name)
+        check_if_partition_file_exist = 0
+        while not num_files <= 0:
+            file_name_temp = self.files_full_path[num_files - 1]
+            with open(file_name_temp, "r", encoding='Latin1') as file:
+                print(f'Lendo o arquivo: {self.files_full_path[num_files - 1]}')
+                data = csv.DictReader(file, delimiter=';')
+                num_partitions = len(self.partitions_name)
+                while not num_partitions == 0:
+                    if not self.partitions_name[num_partitions-1] == '':
+                        partition_file_name = "partition_" + self.partitions_name[num_partitions-1]
+                    else:
+                        partition_file_name = "partition_" + "null"
+                    if not os.path.isfile("data/" + partition_file_name):
+                        check_if_partition_file_exist = 0
+                    else:
+                        check_if_partition_file_exist = 1
+                    with open("data/" + partition_file_name, "a") as split_file:
+                        print(f'Gravando partição {self.partitions_name[num_partitions-1]} no arquivo {partition_file_name}')
+                        writer = csv.DictWriter(split_file, data.fieldnames, delimiter=";")
+                        if check_if_partition_file_exist == 0:
+                            writer.writeheader()
+                        for x in data:
+                            if x[self.partition_field] == self.partitions_name[num_partitions-1]:
+                                writer.writerow(x)
+                    file.seek(0, 0)
+                    num_partitions -= 1
+            num_files -= 1
 
-source.directory_list()
-print()
-source.get_source_files()
 
-source.get_partitions_names(field='estado')
-print(source.partitions_name)
+
+
+
+
+
+
+if __name__ == "__main__":
+
+    source = DataSource(source_path="data/2021", file_extension="csv")
+
+    source.directory_list()
+    print()
+    source.get_source_files()
+    source.get_partitions_names(field='estado')
+    print(source.partitions_name)
+    source.split_data_in_partitions()
