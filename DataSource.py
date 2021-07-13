@@ -31,9 +31,9 @@ class DataSource:
     def directory_list(self):
         with os.scandir(self.source_path) as sp:
             index = 1
-            print("+++++++++++++++++++++++++++++++++++++++")
-            print(f"LISTING DIRECTORY \'{self.source_path}\'")
-            print("+++++++++++++++++++++++++++++++++++++++")
+            print(f'{(21 + len(self.source_path)) * "+"}')
+            print(f"LISTING DIRECTORY: \'{self.source_path}\'")
+            print(f'{(21 + len(self.source_path)) * "+"}')
             for entry in sp:
                 print(f'{index}. {entry.name}')
                 index += 1
@@ -63,20 +63,24 @@ class DataSource:
         while not num_files <= 0:
             file_name_temp = self.files_full_path[num_files - 1]
             with open(file_name_temp, "r", encoding='Latin1') as file:
-                print(f'Lendo o arquivo: {self.files_full_path[num_files - 1]}')
+                print(f'{(17 + len(self.files_full_path[num_files - 1]))*"+"}')
+                print(f'READING FILE: {self.files_full_path[num_files - 1]}')
+                print(f'{(17 + len(self.files_full_path[num_files - 1]))*"+"}')
                 data = csv.DictReader(file, delimiter=';')
                 num_partitions = len(self.partitions_name)
                 while not num_partitions == 0:
                     if not self.partitions_name[num_partitions-1] == '':
-                        partition_file_name = "partition_" + self.partitions_name[num_partitions-1]
+                        partition_file_name = self.source_path + "partition_" + self.partitions_name[num_partitions-1] + ".csv"
                     else:
-                        partition_file_name = "partition_" + "null"
-                    if not os.path.isfile("data/" + partition_file_name):
+                        partition_file_name = self.source_path + "partition_" + "null.csv"
+                    if not os.path.isfile(partition_file_name):
                         check_if_partition_file_exist = 0
                     else:
                         check_if_partition_file_exist = 1
-                    with open("data/" + partition_file_name, "a") as split_file:
-                        print(f'Gravando partição {self.partitions_name[num_partitions-1]} no arquivo {partition_file_name}')
+                    with open(partition_file_name, "a", encoding='Latin1') as split_file:
+                        print(f'{(31 + len(self.partitions_name[num_partitions-1]) + len(partition_file_name))*"+"}')
+                        print(f'WRITING PARTITION: {self.partitions_name[num_partitions-1]} no arquivo {partition_file_name}')
+                        print(f'{(31 + len(self.partitions_name[num_partitions-1]) + len(partition_file_name))*"+"}')
                         writer = csv.DictWriter(split_file, data.fieldnames, delimiter=";")
                         if check_if_partition_file_exist == 0:
                             writer.writeheader()
@@ -96,11 +100,14 @@ class DataSource:
 
 if __name__ == "__main__":
 
-    source = DataSource(source_path="data/2021", file_extension="csv")
+    source = DataSource(source_path="data/2021/", file_extension="csv")
 
     source.directory_list()
     print()
     source.get_source_files()
-    source.get_partitions_names(field='estado')
+    print()
+    source.get_partitions_names(field='regiao')
+    print()
     print(source.partitions_name)
+    print()
     source.split_data_in_partitions()
