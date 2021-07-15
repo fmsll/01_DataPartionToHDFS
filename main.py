@@ -185,12 +185,3 @@ if __name__ == "__main__":
         else:
             pass
 
-    # Cópia dos arquivos fonte para dentro do container que se encontra o HDFS
-    # Os arquivos serão colocados no diretório especificado na variável 'container_dest_path'
-    # for file in source.files_full_path:
-    #     copia_arquivos_para_container(file, container_dest_path, hdfs_container_name)
-
-
-    #print(verifica_banco_dados_existe('hive-server', 'xxxx'))
-    # print(lista_banco_de_dados(container_name="hive-server"))
-    # print(lista_tabelas(container_name="hive-server",dbname="covid19"))
