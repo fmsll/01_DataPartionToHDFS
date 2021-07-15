@@ -11,6 +11,7 @@ class DataSource:
         self.files_full_path = []
         self.partitions_name = []
         self.partition_field = ""
+        self.partition_files = []
 
     @property
     def source_path(self):
@@ -70,9 +71,10 @@ class DataSource:
                 num_partitions = len(self.partitions_name)
                 while not num_partitions == 0:
                     if not self.partitions_name[num_partitions-1] == '':
-                        partition_file_name = self.source_path + "partition_" + self.partitions_name[num_partitions-1] + ".csv"
+                        partition_file_name = self.source_path + self.partitions_name[num_partitions-1] + ".csv"
+                        self.partition_files.append(partition_file_name)
                     else:
-                        partition_file_name = self.source_path + "partition_" + "null.csv"
+                        partition_file_name = self.source_path + "null.csv"
                     if not os.path.isfile(partition_file_name):
                         check_if_partition_file_exist = 0
                     else:
@@ -99,6 +101,8 @@ class DataSource:
 
 
 if __name__ == "__main__":
+
+
 
     source = DataSource(source_path="data/2021/", file_extension="csv")
 
